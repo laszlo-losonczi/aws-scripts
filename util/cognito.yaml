@@ -1,0 +1,332 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters: 
+  CustomerCognitoPreSignUp:
+    Type: String
+  Prefix:
+    Type: String
+Resources:
+  CustomerCognito:
+    Type: AWS::Cognito::UserPool
+    Properties: 
+      LambdaConfig:
+        PreSignUp: !Ref CustomerCognitoPreSignUp
+      AutoVerifiedAttributes: 
+        - email
+      Policies: 
+        PasswordPolicy: 
+          MinimumLength: 6
+          RequireNumbers: true
+          TemporaryPasswordValidityDays: 45
+      Schema: 
+        - Name: name
+          AttributeDataType: String
+          DeveloperOnlyAttribute: false
+          Mutable: true
+          Required: true
+          StringAttributeConstraints: 
+            MinLength: "0"
+            MaxLength: "2048"
+        - Name: family_name
+          AttributeDataType: String
+          DeveloperOnlyAttribute: false
+          Mutable: true
+          Required: true
+          StringAttributeConstraints: 
+            MinLength: "0"
+            MaxLength: "2048"
+        - Name: email
+          AttributeDataType: String
+          DeveloperOnlyAttribute: false
+          Mutable: true
+          Required: true
+          StringAttributeConstraints: 
+            MinLength: "0"
+            MaxLength: "2048"                        
+        - Name: Company
+          AttributeDataType: String
+          DeveloperOnlyAttribute: false
+          Mutable: true
+          Required: false
+          StringAttributeConstraints: 
+            MinLength: "1"
+        - Name: Preferred-Contact
+          AttributeDataType: String
+          DeveloperOnlyAttribute: false
+          Mutable: true
+          Required: false
+          StringAttributeConstraints: 
+            MinLength: "1"
+        - Name: PhoneNumber
+          AttributeDataType: String
+          DeveloperOnlyAttribute: false
+          Mutable: true
+          Required: false
+          StringAttributeConstraints: 
+            MinLength: "1"
+        - Name: localCodePreference
+          AttributeDataType: String
+          DeveloperOnlyAttribute: false
+          Mutable: true
+          Required: false
+        - Name: timeZonePreference
+          AttributeDataType: String
+          DeveloperOnlyAttribute: false
+          Mutable: true
+          Required: false                                      
+      UsernameAttributes: 
+        - email
+      UserPoolName: !Sub '${Prefix}-customer'
+      VerificationMessageTemplate: 
+        EmailMessage: '{####}'
+        DefaultEmailOption: CONFIRM_WITH_CODE
+  EssentialsCustomerAppRole:
+    Type: AWS::Cognito::UserPoolClient
+    Properties: 
+      ClientName: EssentialsCustomerAppRole
+      ExplicitAuthFlows: 
+        - USER_PASSWORD_AUTH
+      GenerateSecret: false
+      ReadAttributes: &customerAttributes
+        - name 
+        - given_name 
+        - family_name
+        - middle_name
+        - nickname
+        - preferred_username
+        - profile
+        - picture
+        - website
+        - email
+        - email_verified
+        - gender
+        - birthdate
+        - zoneinfo
+        - locale
+        - phone_number
+        - phone_number_verified
+        - address
+        - updated_at
+        - custom:Company
+        - custom:Preferred-Contact
+        - custom:PhoneNumber 
+        - custom:localCodePreference
+        - custom:timeZonePreference
+      UserPoolId: !Ref CustomerCognito
+      # WriteAttributes: 
+      #   *customerAttributes
+  EssentialsCustomerPortalRole:
+    Type: AWS::Cognito::UserPoolClient
+    Properties: 
+      ClientName: EssentialsCustomerPortalRole
+      ExplicitAuthFlows: 
+        - USER_PASSWORD_AUTH
+      GenerateSecret: false
+      ReadAttributes: 
+        *customerAttributes
+      UserPoolId: !Ref CustomerCognito
+      # WriteAttributes: 
+      #   *customerAttributes
+  VendorCognito:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      AutoVerifiedAttributes: 
+        - email
+      Policies: 
+        PasswordPolicy: 
+          MinimumLength: 8
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          RequireUppercase: true
+          TemporaryPasswordValidityDays: 7
+      Schema: 
+        - Name: name
+          AttributeDataType: String
+          DeveloperOnlyAttribute: false
+          Mutable: true
+          Required: true
+          StringAttributeConstraints: 
+            MinLength: "0"
+            MaxLength: "2048"
+        - Name: family_name
+          AttributeDataType: String
+          DeveloperOnlyAttribute: false
+          Mutable: true
+          Required: true
+          StringAttributeConstraints: 
+            MinLength: "0"
+            MaxLength: "2048"
+        - Name: email
+          AttributeDataType: String
+          DeveloperOnlyAttribute: false
+          Mutable: true
+          Required: true
+          StringAttributeConstraints: 
+            MinLength: "0"
+            MaxLength: "2048"                        
+        - Name: VendorId
+          AttributeDataType: String
+          DeveloperOnlyAttribute: false
+          Mutable: true
+          Required: false
+          StringAttributeConstraints: 
+            MinLength: "1"                                   
+      UsernameAttributes: 
+        - email
+      UserPoolName: !Sub '${Prefix}-vendor'
+      VerificationMessageTemplate: 
+        EmailMessage: '{####}'
+        DefaultEmailOption: CONFIRM_WITH_CODE
+  EssentialsVendorAppRole:
+    Type: AWS::Cognito::UserPoolClient
+    Properties: 
+      ClientName: EssentialsVendorAppRole
+      # ExplicitAuthFlows: 
+      #   - USER_PASSWORD_AUTH
+      GenerateSecret: false
+      ReadAttributes:
+        - name 
+        - family_name
+        - email
+        - email_verified
+        - custom:VendorId
+      UserPoolId: !Ref VendorCognito
+      # WriteAttributes: 
+      #   - custom:VendorId
+  EssentialsVendorPortalRole:
+    Type: AWS::Cognito::UserPoolClient
+    Properties: 
+      ClientName: EssentialsVendorPortalRole
+      # ExplicitAuthFlows: 
+      #   - USER_PASSWORD_AUTH
+      GenerateSecret: false
+      ReadAttributes:
+        - name 
+        - family_name
+        - email
+        - email_verified
+        - custom:VendorId
+      UserPoolId: !Ref VendorCognito
+      # WriteAttributes: 
+      #   - custom:VendorId
+  AdminCognito:
+    Type: AWS::Cognito::UserPool
+    Properties: 
+      AutoVerifiedAttributes: 
+        - email
+      Policies: 
+        PasswordPolicy: 
+          MinimumLength: 6
+          RequireNumbers: true
+          TemporaryPasswordValidityDays: 45
+      Schema: 
+        - Name: name
+          AttributeDataType: String
+          DeveloperOnlyAttribute: false
+          Mutable: true
+          Required: true
+          StringAttributeConstraints: 
+            MinLength: "0"
+            MaxLength: "2048"
+        - Name: family_name
+          AttributeDataType: String
+          DeveloperOnlyAttribute: false
+          Mutable: true
+          Required: true
+          StringAttributeConstraints: 
+            MinLength: "0"
+            MaxLength: "2048"
+        - Name: email
+          AttributeDataType: String
+          DeveloperOnlyAttribute: false
+          Mutable: true
+          Required: true
+          StringAttributeConstraints: 
+            MinLength: "0"
+            MaxLength: "2048"                        
+        - Name: AdminId
+          AttributeDataType: String
+          DeveloperOnlyAttribute: false
+          Mutable: true
+          Required: false
+          StringAttributeConstraints: 
+            MinLength: "1"                                   
+      UsernameAttributes: 
+        - email
+      UserPoolName: !Sub '${Prefix}-admin'
+      VerificationMessageTemplate: 
+        EmailMessage: '{####}'
+        DefaultEmailOption: CONFIRM_WITH_CODE
+  EssentialsAdminPortalRole:
+    Type: AWS::Cognito::UserPoolClient
+    Properties: 
+      ClientName: EssentialsAdminPortalRole
+      # ExplicitAuthFlows: 
+      #   - USER_PASSWORD_AUTH
+      GenerateSecret: false
+      ReadAttributes:
+        - name 
+        - family_name
+        - email
+        - custom:AdminId
+      UserPoolId: !Ref AdminCognito
+      # WriteAttributes: 
+      #   - custom:AdminId
+  EssentialsAdminAppRole:
+    Type: AWS::Cognito::UserPoolClient
+    Properties: 
+      ClientName: EssentialsAdminAppRole
+      # ExplicitAuthFlows: 
+      #   - USER_PASSWORD_AUTH
+      GenerateSecret: false
+      ReadAttributes:
+        - name 
+        - family_name
+        - email
+        - custom:AdminId
+      UserPoolId: !Ref AdminCognito
+      # WriteAttributes: 
+      #   - custom:AdminId
+Outputs:
+  CustomerCognitoPoolUrl:
+    Description: Customer cognito pool Url
+    Value: !GetAtt CustomerCognito.ProviderURL
+  CustomerCognitoArn:
+    Description: Customer cognito Arn
+    Value: !GetAtt CustomerCognito.Arn
+  CustomerCognitoPoolId:
+    Description: Customer cognito pool Id
+    Value: !Ref CustomerCognito
+  EssentialsCustomerAppRoleClientId:
+    Description: EssentialsCustomerAppRole client Id
+    Value: !Ref EssentialsCustomerAppRole
+  EssentialsCustomerPortalRoleClientId:
+    Description: EssentialsCustomerPortalRole client Id
+    Value: !Ref EssentialsCustomerPortalRole
+  VendorCognitoPoolUrl:
+    Description: Vendor cognito pool Url
+    Value: !GetAtt VendorCognito.ProviderURL
+  VendorCognitoArn:
+    Description: Vendor cognito Arn
+    Value: !GetAtt VendorCognito.Arn
+  VendorCognitoPoolId:
+    Description: Vendor cognito pool Id
+    Value: !Ref VendorCognito
+  EssentialsVendorAppRoleClientId:
+    Description: EssentialsVendorAppRole client Id
+    Value: !Ref EssentialsVendorAppRole
+  EssentialsVendorPortalRoleClientId:
+    Description: EssentialsVendorPortalRole client Id
+    Value: !Ref EssentialsVendorPortalRole
+  AdminCognitoPoolUrl:
+    Description: Admin cognito pool Url
+    Value: !GetAtt AdminCognito.ProviderURL
+  EssentialsAdminPortalRoleClientId:
+    Description: EssentialsAdminPortalRole client Id
+    Value: !Ref EssentialsAdminPortalRole
+  EssentialsAdminAppRoleClientId:
+    Description: EssentialsAdminAppRole client Id
+    Value: !Ref EssentialsAdminAppRole
+  
+
+
