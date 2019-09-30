@@ -5,6 +5,7 @@ essentialsVendorPortalPlatformRepoLocation=/mnt/c/PROLOGIS/repos/EssentialsVendo
 prefix='ll-dev'
 region='eu-west-1'
 cloudFrontDistribution=E1WQOLRV0UBRM3
+backendUrl='https://d2dj7v1wv7t9aj.cloudfront.net';
 
 # This is a custom resource, don't change unless you deploy it anywhere else than (DEV account-Ireland)
 cognitoTriggerEnablerLambdaArn='arn:aws:lambda:eu-west-1:486649234389:function:ll-dev-custom-resource-po-PostConfirmationTriggerL-1QS6Y1MG1MZQJ'
@@ -20,6 +21,8 @@ fileUploadStackName="$prefix-file-upload"
 fixItStackName="$prefix-fix-it"
 moveInToolStackName="$prefix-move-in-tool"
 vendorTestUserConfirmationStackName="$prefix-vendor-test-user-confirmation"
+trackingStackName="$prefix-tracking"
+buildingStackName="$prefix-building"
 
 categoriesStackName="$prefix-categories"
 serviceAreaStackName="$prefix-service-area"
@@ -28,5 +31,4 @@ workflowStateStackName="$prefix-workflow-state"
 vendorCognitoPostConfirmationStackName="$prefix-vendor-cognito-post-confirmation"
 
 
-buildingStackName="$prefix-building"
 
